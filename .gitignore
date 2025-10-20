@@ -1,0 +1,14 @@
+# Ignore build directories
+debug/
+release/
+
+# Ignore Makefile
+Makefile*
+
+# Ignore stash and qmake files
+*.stash
+*.qmake
+
+# Ignore data and text files
+*.dat
+*.txt
