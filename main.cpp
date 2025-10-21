@@ -516,6 +516,7 @@ public:
                         appName + " was blocked. Access denied.",
                         QSystemTrayIcon::Warning, 2000);
                 }
+                continue;
             }
             
             if (isRunning && !allowedProcesses.contains(appName)) {
