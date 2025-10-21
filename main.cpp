@@ -9,6 +9,8 @@
 #include <QHBoxLayout>
 #include <QFile>
 #include <QTextStream>
+#include <QComboBox>
+#include <QSettings>
 #include <QTimer>
 #include <QSet>
 #include <QMap>
@@ -543,6 +545,50 @@ protected:
     }
 };
 
+QMap<QString, QString> getInstalledApps()
+{
+    QMap<QString, QString> installedApps;
+    QString uninstallPath = "HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall";
+    QSettings settings(uninstallPath, QSettings::NativeFormat);
+
+    QStringList subKeys = settings.childGroups();
+    foreach (const QString &subKey, subKeys) {
+        settings.beginGroup(subKey);
+        QString displayName = settings.value("DisplayName").toString();
+        QString displayIcon = settings.value("DisplayIcon").toString();
+        if (!displayName.isEmpty() && !displayIcon.isEmpty()) {
+            QString exeName = displayIcon.split(',').first().remove('"').split('\\').last();
+            if (!exeName.isEmpty() && exeName.endsWith(".exe", Qt::CaseInsensitive)) {
+                if (!installedApps.contains(displayName)) {
+                    installedApps.insert(displayName, exeName);
+                }
+            }
+        }
+        settings.endGroup();
+    }
+
+    QString uninstallPathCU = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall";
+    QSettings settingsCU(uninstallPathCU, QSettings::NativeFormat);
+
+    QStringList subKeysCU = settingsCU.childGroups();
+    foreach (const QString &subKey, subKeysCU) {
+        settingsCU.beginGroup(subKey);
+        QString displayName = settingsCU.value("DisplayName").toString();
+        QString displayIcon = settingsCU.value("DisplayIcon").toString();
+        if (!displayName.isEmpty() && !displayIcon.isEmpty()) {
+            QString exeName = displayIcon.split(',').first().remove('"').split('\\').last();
+            if (!exeName.isEmpty() && exeName.endsWith(".exe", Qt::CaseInsensitive)) {
+                if (!installedApps.contains(displayName)) {
+                    installedApps.insert(displayName, exeName);
+                }
+            }
+        }
+        settingsCU.endGroup();
+    }
+
+    return installedApps;
+}
+
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
@@ -564,13 +610,14 @@ int main(int argc, char *argv[]) {
     window.setWindowTitle("App Locker");
     window.resize(320, 320);
 
-    QLabel *label = new QLabel("Enter App Name to Lock:", &window);
+    QLabel *label = new QLabel("Select App to Lock:", &window);
     label->move(30, 30);
 
-    QLineEdit *input = new QLineEdit(&window);
-    input->setPlaceholderText("e.g. Discord.exe");
-    input->move(30, 60);
-    input->resize(240, 25);
+    QComboBox *appComboBox = new QComboBox(&window);
+    appComboBox->move(30, 60);
+    appComboBox->resize(240, 25);
+    QMap<QString, QString> installedApps = getInstalledApps();
+    appComboBox->addItems(installedApps.keys());
 
     QLabel *passLabel = new QLabel("App Password:", &window);
     passLabel->move(30, 100);
@@ -661,7 +708,8 @@ int main(int argc, char *argv[]) {
     loadLockedApps();
 
     QObject::connect(lockBtn, &QPushButton::clicked, [&]() {
-        QString appName = input->text().trimmed();
+        QString displayName = appComboBox->currentText();
+        QString appName = installedApps.value(displayName);
         QString appPass = passwordInput->text().trimmed();
         QString masterPass = masterPasswordInput->text().trimmed();
 
@@ -688,7 +736,6 @@ int main(int argc, char *argv[]) {
 
         if (lockedApps.contains(appName)) {
             QMessageBox::information(&window, "Already Locked", appName + " is already locked!");
-            input->clear();
             return;
         }
 
@@ -706,13 +753,13 @@ int main(int argc, char *argv[]) {
 
         lockedApps.insert(appName);
         QMessageBox::information(&window, "Locked", appName + " has been locked with its own password!");
-        input->clear();
         passwordInput->clear();
         masterPasswordInput->clear();
     });
 
     QObject::connect(unlockBtn, &QPushButton::clicked, [&]() {
-        QString appName = input->text().trimmed();
+        QString displayName = appComboBox->currentText();
+        QString appName = installedApps.value(displayName);
         QString masterPass = masterPasswordInput->text().trimmed();
 
         if (!verifyMasterPassword(masterPass)) {
@@ -748,7 +795,6 @@ int main(int argc, char *argv[]) {
         saveAppPasswords();
 
         QMessageBox::information(&window, "Unlocked", appName + " has been unlocked!");
-        input->clear();
         passwordInput->clear();
         masterPasswordInput->clear();
     });
