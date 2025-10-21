@@ -8,7 +8,7 @@ LockWindow::LockWindow(QWidget *parent)
     : QWidget(parent)
 {
     setWindowTitle("App Locker");
-    resize(300, 200);
+    resize(400, 300);
 
     QLabel *tagLabel = new QLabel("App Tag:");
     tagInput = new QLineEdit();
@@ -23,12 +23,16 @@ LockWindow::LockWindow(QWidget *parent)
     statusLabel = new QLabel("");
 
     QVBoxLayout *layout = new QVBoxLayout();
+    layout->setSpacing(10);  // Add spacing between widgets
+    layout->setContentsMargins(20, 20, 20, 20);  // Add margins around the layout
+    
     layout->addWidget(tagLabel);
     layout->addWidget(tagInput);
     layout->addWidget(passwordLabel);
     layout->addWidget(passwordInput);
     layout->addWidget(lockButton);
     layout->addWidget(unlockButton);
+    layout->addSpacing(10);  // Add extra space before status label
     layout->addWidget(statusLabel);
 
     setLayout(layout);

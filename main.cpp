@@ -20,9 +20,45 @@
 #include <QAction>
 #include <QCloseEvent>
 #include <QCryptographicHash>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QProcess>
+
+#include "version.h"
 
 #include <windows.h>
 #include <tlhelp32.h>
+
+bool isVersionGreaterThan(const QString &v1, const QString &v2) {
+    QString version1 = v1;
+    if (version1.startsWith("v")) {
+        version1 = version1.mid(1);
+    }
+    QString version2 = v2;
+    if (version2.startsWith("v")) {
+        version2 = version2.mid(1);
+    }
+
+    QStringList v1_parts = version1.split('.');
+    QStringList v2_parts = version2.split('.');
+
+    for (int i = 0; i < qMax(v1_parts.size(), v2_parts.size()); ++i) {
+        int part1 = (i < v1_parts.size()) ? v1_parts[i].toInt() : 0;
+        int part2 = (i < v2_parts.size()) ? v2_parts[i].toInt() : 0;
+
+        if (part1 > part2) {
+            return true;
+        }
+        if (part1 < part2) {
+            return false;
+        }
+    }
+    return false;
+}
 
 QSet<QString> lockedApps;
 QSet<QString> allowedProcesses;
@@ -608,7 +644,7 @@ int main(int argc, char *argv[]) {
 
     AppLockerWindow window;
     window.setWindowTitle("App Locker");
-    window.resize(320, 320);
+    window.resize(320, 400);  // Increased height to accommodate all buttons
 
     QLabel *label = new QLabel("Select App to Lock:", &window);
     label->move(30, 30);
@@ -647,8 +683,13 @@ int main(int argc, char *argv[]) {
     changePassBtn->move(55, 270);
     changePassBtn->resize(180, 30);
 
+    // Added spacing between buttons
+    QPushButton *updateBtn = new QPushButton("Check for Updates", &window);
+    updateBtn->move(55, 320);  // Moved down to create more space
+    updateBtn->resize(180, 30);
+
     // System Tray setup
-    QSystemTrayIcon *trayIcon = new QSystemTrayIcon(QIcon("icon.png"), &app);
+    QSystemTrayIcon *trayIcon = new QSystemTrayIcon(QIcon("icon.ico"), &app);
     trayIcon->setToolTip("App Locker - running in background");
     window.trayIcon = trayIcon;
 
@@ -805,6 +846,36 @@ int main(int argc, char *argv[]) {
         window.checkLockedProcesses();
     });
     timer->start(1000);
+
+    // Update check
+    QNetworkAccessManager *manager = new QNetworkAccessManager(&window);
+    QObject::connect(updateBtn, &QPushButton::clicked, [&]() {
+        QNetworkRequest request(QUrl("https://api.github.com/repos/WilardzySenpai/AppLocker/releases/latest"));
+        request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+        QNetworkReply *reply = manager->get(request);
+        QObject::connect(reply, &QNetworkReply::finished, [reply, &window]() {
+            if (reply->error() == QNetworkReply::NoError) {
+                QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+                QJsonObject obj = doc.object();
+                QString latestVersion = obj["tag_name"].toString();
+                if (isVersionGreaterThan(latestVersion, APP_VERSION)) {
+                    QMessageBox::StandardButton buttonReply = QMessageBox::question(&window, "Update Available", "A new version of App Locker is available. Do you want to download and install it?", QMessageBox::Yes|QMessageBox::No);
+                    if (buttonReply == QMessageBox::Yes) {
+                        QJsonArray assets = obj["assets"].toArray();
+                        if (assets.size() > 0) {
+                            QString downloadUrl = assets[0].toObject()["browser_download_url"].toString();
+                            QProcess::startDetached("explorer", QStringList() << downloadUrl);
+                        }
+                    }
+                } else {
+                    QMessageBox::information(&window, "No Update", "You are using the latest version of App Locker.");
+                }
+            } else {
+                QMessageBox::warning(&window, "Error", "Failed to check for updates.");
+            }
+            reply->deleteLater();
+        });
+    });
 
     window.show();
     return app.exec();

@@ -1,4 +1,4 @@
-QT += widgets
+QT += widgets network core
 CONFIG += c++17
 CONFIG(debug, debug|release) {
     CONFIG += console
@@ -6,3 +6,5 @@ CONFIG(debug, debug|release) {
 SOURCES += main.cpp \
            lockwindow.cpp
 HEADERS += lockwindow.h
+RESOURCES += resources.qrc
+RC_FILE = AppLocker.rc
