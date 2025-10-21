@@ -2,6 +2,7 @@
 debug/
 release/
 AppLockerRelease/
+AppLockerInstaller/
 
 # Ignore Makefile
 Makefile*
