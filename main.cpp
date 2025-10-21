@@ -689,7 +689,7 @@ int main(int argc, char *argv[]) {
     updateBtn->resize(180, 30);
 
     // System Tray setup
-    QSystemTrayIcon *trayIcon = new QSystemTrayIcon(QIcon("icon.png"), &app);
+    QSystemTrayIcon *trayIcon = new QSystemTrayIcon(QIcon("icon.ico"), &app);
     trayIcon->setToolTip("App Locker - running in background");
     window.trayIcon = trayIcon;
 
