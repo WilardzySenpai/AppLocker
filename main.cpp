@@ -27,6 +27,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QProcess>
+#include <QSharedMemory>
 
 #include "version.h"
 
@@ -628,6 +629,19 @@ QMap<QString, QString> getInstalledApps()
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
+    QSharedMemory sharedMemory;
+    sharedMemory.setKey("AppLocker_SingleInstance");
+
+    if (sharedMemory.attach()) {
+        QMessageBox::warning(nullptr, "App Locker", "App Locker is already running.");
+        return 0;
+    }
+
+    if (!sharedMemory.create(1)) {
+        QMessageBox::critical(nullptr, "App Locker", "Failed to create shared memory segment.");
+        return 0;
+    }
+
     // Load master password
     loadMasterPassword();
     
@@ -644,7 +658,7 @@ int main(int argc, char *argv[]) {
 
     AppLockerWindow window;
     window.setWindowTitle("App Locker");
-    window.resize(320, 400);  // Increased height to accommodate all buttons
+    window.resize(320, 320);
 
     QLabel *label = new QLabel("Select App to Lock:", &window);
     label->move(30, 30);
@@ -683,13 +697,12 @@ int main(int argc, char *argv[]) {
     changePassBtn->move(55, 270);
     changePassBtn->resize(180, 30);
 
-    // Added spacing between buttons
     QPushButton *updateBtn = new QPushButton("Check for Updates", &window);
-    updateBtn->move(55, 320);  // Moved down to create more space
+    updateBtn->move(55, 310);
     updateBtn->resize(180, 30);
 
     // System Tray setup
-    QSystemTrayIcon *trayIcon = new QSystemTrayIcon(QIcon("icon.ico"), &app);
+    QSystemTrayIcon *trayIcon = new QSystemTrayIcon(QIcon("icon.png"), &app);
     trayIcon->setToolTip("App Locker - running in background");
     window.trayIcon = trayIcon;
 
