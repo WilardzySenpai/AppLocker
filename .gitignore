@@ -1,6 +1,7 @@
 # Ignore build directories
 debug/
 release/
+AppLockerRelease/
 
 # Ignore Makefile
 Makefile*
