@@ -27,6 +27,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QProcess>
+#include <QStandardPaths>
+#include <QDir>
 #include <QSharedMemory>
 
 #include "version.h"
@@ -72,9 +74,19 @@ QString hashPassword(const QString &password) {
     return QString(QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha256).toHex());
 }
 
+// Helper function to get the full path for a data file
+QString getDataFilePath(const QString &fileName) {
+    QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir dir(appDataPath);
+    if (!dir.exists()) {
+        dir.mkpath(".");
+    }
+    return appDataPath + "/" + fileName;
+}
+
 // Load master password from file
 void loadMasterPassword() {
-    QFile file("master_password.dat");
+    QFile file(getDataFilePath("master_password.dat"));
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&file);
         masterPasswordHash = in.readLine().trimmed();
@@ -85,7 +97,7 @@ void loadMasterPassword() {
 // Save master password to file
 void saveMasterPassword(const QString &password) {
     masterPasswordHash = hashPassword(password);
-    QFile file("master_password.dat");
+    QFile file(getDataFilePath("master_password.dat"));
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
         out << masterPasswordHash;
@@ -101,7 +113,7 @@ bool verifyMasterPassword(const QString &password) {
 // Load app passwords from file
 void loadAppPasswords() {
     appPasswords.clear();
-    QFile file("app_passwords.dat");
+    QFile file(getDataFilePath("app_passwords.dat"));
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&file);
         while (!in.atEnd()) {
@@ -119,7 +131,7 @@ void loadAppPasswords() {
 
 // Save app passwords to file
 void saveAppPasswords() {
-    QFile file("app_passwords.dat");
+    QFile file(getDataFilePath("app_passwords.dat"));
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
         for (auto it = appPasswords.begin(); it != appPasswords.end(); ++it) {
@@ -498,7 +510,7 @@ void killProcessByName(const QString &processName) {
 
 void loadLockedApps() {
     lockedApps.clear();
-    QFile file("locked_apps.txt");
+    QFile file(getDataFilePath("locked_apps.txt"));
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&file);
         while (!in.atEnd()) {
@@ -702,7 +714,7 @@ int main(int argc, char *argv[]) {
     updateBtn->resize(180, 30);
 
     // System Tray setup
-    QSystemTrayIcon *trayIcon = new QSystemTrayIcon(QIcon("icon.png"), &app);
+    QSystemTrayIcon *trayIcon = new QSystemTrayIcon(QIcon(":/icon.ico"), &app);
     trayIcon->setToolTip("App Locker - running in background");
     window.trayIcon = trayIcon;
 
@@ -794,7 +806,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Add to locked apps list
-        QFile file("locked_apps.txt");
+        QFile file(getDataFilePath("locked_apps.txt"));
         if (file.open(QIODevice::Append | QIODevice::Text)) {
             QTextStream out(&file);
             out << appName << "\n";
@@ -838,7 +850,7 @@ int main(int argc, char *argv[]) {
         appPasswords.remove(appName);
 
         // Update files
-        QFile file("locked_apps.txt");
+        QFile file(getDataFilePath("locked_apps.txt"));
         if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
             QTextStream out(&file);
             for (const QString &a : lockedApps)
@@ -884,7 +896,7 @@ int main(int argc, char *argv[]) {
                     QMessageBox::information(&window, "No Update", "You are using the latest version of App Locker.");
                 }
             } else {
-                QMessageBox::warning(&window, "Error", "Failed to check for updates.");
+                QMessageBox::warning(&window, "Error", "Failed to check for updates: " + reply->errorString());
             }
             reply->deleteLater();
         });

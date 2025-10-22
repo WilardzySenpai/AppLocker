@@ -2,7 +2,7 @@
 ; Created with Inno Setup
 
 #define MyAppName "App Locker"
-#define MyAppVersion "1.0.2"
+#define MyAppVersion "1.0.3"
 #define MyAppPublisher "Hachiki"
 #define MyAppURL "https://github.com/WilardzySenpai/AppLocker"
 #define MyAppExeName "AppLocker.exe"
