@@ -30,6 +30,7 @@
 #include <QStandardPaths>
 #include <QDir>
 #include <QSharedMemory>
+#include <QCoreApplication>
 
 #include "version.h"
 
@@ -522,7 +523,7 @@ void loadLockedApps() {
 }
 
 // Custom widget class to override closeEvent
-    class AppLockerWindow : public QWidget {
+class AppLockerWindow : public QWidget {
     Q_OBJECT
 public:
     QSystemTrayIcon *trayIcon;
@@ -535,7 +536,9 @@ public:
             trayIcon->hide();
             delete trayIcon;
         }
-    }    void checkLockedProcesses() {
+    }
+
+    void checkLockedProcesses() {
         for (const QString &appName : lockedApps) {
             bool isRunning = isProcessRunning(appName);
             bool prevRunning = wasRunning.value(appName, false);
@@ -644,6 +647,9 @@ QMap<QString, QString> getInstalledApps()
 }
 
 int main(int argc, char *argv[]) {
+    // CRITICAL FIX: Initialize Qt resources before anything else
+    Q_INIT_RESOURCE(resources);
+    
     QApplication app(argc, argv);
 
     QSharedMemory sharedMemory;
@@ -718,22 +724,39 @@ int main(int argc, char *argv[]) {
     updateBtn->move(55, 310);
     updateBtn->resize(180, 30);
 
-    // System Tray setup
+    // System Tray setup with improved icon loading
     QIcon icon;
+    
+    // Try multiple methods to load the icon
     if (QFile::exists(":/icon.ico")) {
         icon = QIcon(":/icon.ico");
-        qDebug() << "Icon file exists in resources";
+        qDebug() << "Icon loaded from resources";
     } else {
-        qDebug() << "Icon file not found in resources";
+        // Fallback: try to load from application directory
+        QString iconPath = QCoreApplication::applicationDirPath() + "/icon.ico";
+        if (QFile::exists(iconPath)) {
+            icon = QIcon(iconPath);
+            qDebug() << "Icon loaded from application directory:" << iconPath;
+        } else {
+            qDebug() << "Icon file not found in resources or application directory";
+            qDebug() << "Checked paths:";
+            qDebug() << "  - :/icon.ico (resource)";
+            qDebug() << "  -" << iconPath << "(file system)";
+        }
     }
+    
+    // Use a default icon if still null
+    if (icon.isNull()) {
+        qDebug() << "Using default application icon";
+        icon = QApplication::style()->standardIcon(QStyle::SP_ComputerIcon);
+    }
+    
     QSystemTrayIcon *trayIcon = new QSystemTrayIcon(&app);
     trayIcon->setIcon(icon);
     trayIcon->setToolTip("App Locker - running in background");
-    if (!trayIcon->icon().isNull()) {
-        qDebug() << "Tray icon loaded successfully";
-    } else {
-        qDebug() << "Failed to load tray icon";
-    }
+    
+    qDebug() << "Tray icon null status:" << trayIcon->icon().isNull();
+    
     window.trayIcon = trayIcon;
 
     QMenu *trayMenu = new QMenu();

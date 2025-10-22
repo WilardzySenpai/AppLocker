@@ -49,6 +49,9 @@ Source: "C:\Users\Hp\OneDrive\Pictures\Desktop\AppLocker\AppLockerRelease\*.dll"
 Source: "C:\Users\Hp\OneDrive\Pictures\Desktop\AppLocker\AppLockerRelease\platforms\*"; DestDir: "{app}\platforms"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\Users\Hp\OneDrive\Pictures\Desktop\AppLocker\AppLockerRelease\styles\*"; DestDir: "{app}\styles"; Flags: ignoreversion recursesubdirs createallsubdirs
 
+; CRITICAL FIX: Include icon.ico in the application directory as a fallback
+Source: "C:\Users\Hp\OneDrive\Pictures\Desktop\AppLocker\AppLockerInstaller\icon.ico"; DestDir: "{app}"; Flags: ignoreversion
+
 ; Documentation
 Source: "C:\Users\Hp\OneDrive\Pictures\Desktop\AppLocker\AppLockerInstaller\README.txt"; DestDir: "{app}"; Flags: ignoreversion isreadme
 Source: "C:\Users\Hp\OneDrive\Pictures\Desktop\AppLocker\AppLockerInstaller\LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion
