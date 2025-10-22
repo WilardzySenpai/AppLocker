@@ -522,15 +522,20 @@ void loadLockedApps() {
 }
 
 // Custom widget class to override closeEvent
-class AppLockerWindow : public QWidget {
+    class AppLockerWindow : public QWidget {
     Q_OBJECT
 public:
     QSystemTrayIcon *trayIcon;
     QMap<QString, bool> wasRunning;
     
     AppLockerWindow(QWidget *parent = nullptr) : QWidget(parent), trayIcon(nullptr) {}
-
-    void checkLockedProcesses() {
+    
+    ~AppLockerWindow() {
+        if (trayIcon) {
+            trayIcon->hide();
+            delete trayIcon;
+        }
+    }    void checkLockedProcesses() {
         for (const QString &appName : lockedApps) {
             bool isRunning = isProcessRunning(appName);
             bool prevRunning = wasRunning.value(appName, false);
@@ -714,8 +719,21 @@ int main(int argc, char *argv[]) {
     updateBtn->resize(180, 30);
 
     // System Tray setup
-    QSystemTrayIcon *trayIcon = new QSystemTrayIcon(QIcon(":/icon.ico"), &app);
+    QIcon icon;
+    if (QFile::exists(":/icon.ico")) {
+        icon = QIcon(":/icon.ico");
+        qDebug() << "Icon file exists in resources";
+    } else {
+        qDebug() << "Icon file not found in resources";
+    }
+    QSystemTrayIcon *trayIcon = new QSystemTrayIcon(&app);
+    trayIcon->setIcon(icon);
     trayIcon->setToolTip("App Locker - running in background");
+    if (!trayIcon->icon().isNull()) {
+        qDebug() << "Tray icon loaded successfully";
+    } else {
+        qDebug() << "Failed to load tray icon";
+    }
     window.trayIcon = trayIcon;
 
     QMenu *trayMenu = new QMenu();
