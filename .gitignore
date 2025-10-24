@@ -1,0 +1,20 @@
+# Ignore build directories
+debug/
+release/
+AppLockerRelease/
+AppLockerInstaller/
+
+# Ignore Makefile
+Makefile*
+
+# Ignore stash and qmake files
+*.stash
+*.qmake
+
+# Ignore moc files
+*.moc
+moc_predefs.h
+
+# Ignore data and text files
+*.dat
+*.txt
