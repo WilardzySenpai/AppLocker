@@ -1,68 +1,53 @@
 #include "lockwindow.h"
-#include <QVBoxLayout>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QLabel>
+#include "ui_lockwindow.h"
 
 LockWindow::LockWindow(QWidget *parent)
-    : QWidget(parent)
+    : QMainWindow(parent)
+    , ui(new Ui::AppLocker)
 {
-    setWindowTitle("App Locker");
-    resize(400, 300);
+    ui->setupUi(this);
 
-    QLabel *tagLabel = new QLabel("App Tag:");
-    tagInput = new QLineEdit();
-
-    QLabel *passwordLabel = new QLabel("Password:");
-    passwordInput = new QLineEdit();
-    passwordInput->setEchoMode(QLineEdit::Password);
-
-    QPushButton *lockButton = new QPushButton("Lock");
-    QPushButton *unlockButton = new QPushButton("Unlock");
-
-    statusLabel = new QLabel("");
-
-    QVBoxLayout *layout = new QVBoxLayout();
-    layout->setSpacing(10);  // Add spacing between widgets
-    layout->setContentsMargins(20, 20, 20, 20);  // Add margins around the layout
+    // Connect signals to slots
+    connect(ui->lockButton, &QPushButton::clicked, this, &LockWindow::handleLock);
+    connect(ui->unlockButton, &QPushButton::clicked, this, &LockWindow::handleUnlock);
     
-    layout->addWidget(tagLabel);
-    layout->addWidget(tagInput);
-    layout->addWidget(passwordLabel);
-    layout->addWidget(passwordInput);
-    layout->addWidget(lockButton);
-    layout->addWidget(unlockButton);
-    layout->addSpacing(10);  // Add extra space before status label
-    layout->addWidget(statusLabel);
+    // Set initial subtitle style
+    ui->subtitleLabel->setStyleSheet("color: #7f8c8d;");
+}
 
-    setLayout(layout);
-
-    connect(lockButton, &QPushButton::clicked, this, &LockWindow::handleLock);
-    connect(unlockButton, &QPushButton::clicked, this, &LockWindow::handleUnlock);
+LockWindow::~LockWindow()
+{
+    delete ui;
 }
 
 void LockWindow::handleLock()
 {
-    QString tag = tagInput->text();
-    QString pass = passwordInput->text();
+    QString app = ui->appComboBox->currentText();
+    QString appPass = ui->appPasswordEdit->text();
+    QString masterPass = ui->masterPasswordEdit->text();
 
-    if (tag.isEmpty() || pass.isEmpty()) {
-        statusLabel->setText("Please enter both tag and password!");
+    if (appPass.isEmpty() || masterPass.isEmpty()) {
+        ui->subtitleLabel->setText("Please enter both passwords!");
+        ui->subtitleLabel->setStyleSheet("color: #d32f2f;"); // Red for error
         return;
     }
 
-    statusLabel->setText("Locked " + tag + " with password.");
+    ui->subtitleLabel->setText("Locked " + app + " with password.");
+    ui->subtitleLabel->setStyleSheet("color: #388e3c;"); // Green for success
 }
 
 void LockWindow::handleUnlock()
 {
-    QString tag = tagInput->text();
-    QString pass = passwordInput->text();
+    QString app = ui->appComboBox->currentText();
+    QString appPass = ui->appPasswordEdit->text();
+    QString masterPass = ui->masterPasswordEdit->text();
 
-    if (tag.isEmpty() || pass.isEmpty()) {
-        statusLabel->setText("Please enter both tag and password!");
+    if (appPass.isEmpty() || masterPass.isEmpty()) {
+        ui->subtitleLabel->setText("Please enter both passwords!");
+        ui->subtitleLabel->setStyleSheet("color: #d32f2f;"); // Red for error
         return;
     }
 
-    statusLabel->setText("Unlocked " + tag + ".");
+    ui->subtitleLabel->setText("Unlocked " + app + ".");
+    ui->subtitleLabel->setStyleSheet("color: #388e3c;"); // Green for success
 }

@@ -1,26 +1,26 @@
 #ifndef LOCKWINDOW_H
 #define LOCKWINDOW_H
 
-#include <QWidget>
+#include <QMainWindow>
 
-class QLabel;
-class QLineEdit;
+QT_BEGIN_NAMESPACE
+namespace Ui { class AppLocker; }
+QT_END_NAMESPACE
 
-class LockWindow : public QWidget
+class LockWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    LockWindow(QWidget *parent = nullptr);
+    explicit LockWindow(QWidget *parent = nullptr);
+    ~LockWindow();
 
 private slots:
     void handleLock();
     void handleUnlock();
-
+    
 private:
-    QLineEdit *tagInput;
-    QLineEdit *passwordInput;
-    QLabel *statusLabel;
+    Ui::AppLocker *ui;
 };
 
-#endif // LOCKWINDOW_H
+#endif

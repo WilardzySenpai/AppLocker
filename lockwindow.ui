@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AppLocker</class>
+ <widget class="QMainWindow" name="AppLocker">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>450</width>
+    <height>550</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>450</width>
+    <height>550</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>450</width>
+    <height>550</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>App Locker</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">
+    QMainWindow {
+     background-color: #f5f5f5;
+    }
+    QLabel {
+     color: #333;
+     font-size: 11pt;
+    }
+    QLabel#titleLabel {
+     font-size: 18pt;
+     font-weight: bold;
+     color: #2c3e50;
+    }
+    QLabel#subtitleLabel {
+     font-size: 10pt;
+     color: #7f8c8d;
+    }
+    QComboBox, QLineEdit {
+     padding: 10px;
+     border: 2px solid #ddd;
+     border-radius: 8px;
+     background-color: white;
+     font-size: 10pt;
+    }
+    QComboBox:hover, QLineEdit:hover {
+     border-color: #3498db;
+    }
+    QComboBox:focus, QLineEdit:focus {
+     border-color: #3498db;
+     background-color: #f8fbff;
+    }
+    QPushButton {
+     padding: 12px 24px;
+     border: none;
+     border-radius: 8px;
+     font-size: 11pt;
+     font-weight: bold;
+    }
+    QPushButton#lockButton {
+     background-color: #27ae60;
+     color: white;
+    }
+    QPushButton#lockButton:hover {
+     background-color: #229954;
+    }
+    QPushButton#unlockButton {
+     background-color: #e74c3c;
+     color: white;
+    }
+    QPushButton#unlockButton:hover {
+     background-color: #c0392b;
+    }
+    QPushButton#changeMasterButton {
+     background-color: #3498db;
+     color: white;
+    }
+    QPushButton#changeMasterButton:hover {
+     background-color: #2980b9;
+    }
+    QPushButton#updateButton {
+     background-color: #95a5a6;
+     color: white;
+    }
+    QPushButton#updateButton:hover {
+     background-color: #7f8c8d;
+    }
+    QFrame#headerFrame {
+     background-color: white;
+     border-radius: 12px;
+    }
+    QFrame#mainFrame {
+     background-color: white;
+     border-radius: 12px;
+    }
+   </string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>20</number>
+    </property>
+    <property name="leftMargin">
+     <number>30</number>
+    </property>
+    <property name="topMargin">
+     <number>30</number>
+    </property>
+    <property name="rightMargin">
+     <number>30</number>
+    </property>
+    <property name="bottomMargin">
+     <number>30</number>
+    </property>
+    <item>
+     <widget class="QFrame" name="headerFrame">
+      <property name="frameShape">
+       <enum>QFrame::Shape::StyledPanel</enum>
+      </property>
+      <layout class="QVBoxLayout" name="headerLayout">
+       <property name="spacing">
+        <number>8</number>
+       </property>
+       <property name="leftMargin">
+        <number>20</number>
+       </property>
+       <property name="topMargin">
+        <number>20</number>
+       </property>
+       <property name="rightMargin">
+        <number>20</number>
+       </property>
+       <property name="bottomMargin">
+        <number>20</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="titleLabel">
+         <property name="text">
+          <string>🔒 App Locker</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="subtitleLabel">
+         <property name="text">
+          <string>Secure your applications with password protection</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="mainFrame">
+         <property name="frameShape">
+          <enum>QFrame::Shape::StyledPanel</enum>
+         </property>
+         <layout class="QVBoxLayout" name="mainLayout">
+          <property name="spacing">
+           <number>20</number>
+          </property>
+          <property name="leftMargin">
+           <number>25</number>
+          </property>
+          <property name="topMargin">
+           <number>25</number>
+          </property>
+          <property name="rightMargin">
+           <number>25</number>
+          </property>
+          <property name="bottomMargin">
+           <number>25</number>
+          </property>
+          <item>
+           <layout class="QVBoxLayout" name="appSelectionLayout">
+            <property name="spacing">
+             <number>8</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="appLabel">
+              <property name="text">
+               <string>Select Application:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="appComboBox">
+              <item>
+               <property name="text">
+                <string>Android Studio</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Chrome</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>WhatsApp</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Instagram</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Settings</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="appPasswordLayout">
+            <property name="spacing">
+             <number>8</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="appPasswordLabel">
+              <property name="text">
+               <string>App Password:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="appPasswordEdit">
+              <property name="echoMode">
+               <enum>QLineEdit::EchoMode::Password</enum>
+              </property>
+              <property name="placeholderText">
+               <string>Enter password for this app</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="masterPasswordLayout">
+            <property name="spacing">
+             <number>8</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="masterPasswordLabel">
+              <property name="text">
+               <string>Master Password:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="masterPasswordEdit">
+              <property name="echoMode">
+               <enum>QLineEdit::EchoMode::Password</enum>
+              </property>
+              <property name="placeholderText">
+               <string>Enter your master password</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer1">
+            <property name="orientation">
+             <enum>Qt::Orientation::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Policy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>10</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="actionButtonsLayout">
+            <property name="spacing">
+             <number>15</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="lockButton">
+              <property name="text">
+               <string>🔒 Lock</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="unlockButton">
+              <property name="text">
+               <string>🔓 Unlock</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer2">
+            <property name="orientation">
+             <enum>Qt::Orientation::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Policy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>10</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="changeMasterButton">
+            <property name="text">
+             <string>🔑 Change Master Password</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="updateButton">
+            <property name="text">
+             <string>🔄 Check for Updates</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
