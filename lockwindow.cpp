@@ -3,7 +3,7 @@
 
 LockWindow::LockWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::AppLocker)
+    , ui(new Ui::LockWindow)
 {
     ui->setupUi(this);
 

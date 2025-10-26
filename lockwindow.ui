@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>AppLocker</class>
- <widget class="QMainWindow" name="AppLocker">
+ <class>LockWindow</class>
+ <widget class="QMainWindow" name="LockWindow">
   <property name="geometry">
    <rect>
     <x>0</x>

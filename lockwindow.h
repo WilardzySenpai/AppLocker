@@ -4,7 +4,7 @@
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class AppLocker; }
+namespace Ui { class LockWindow; }
 QT_END_NAMESPACE
 
 class LockWindow : public QMainWindow
@@ -20,7 +20,7 @@ private slots:
     void handleUnlock();
     
 private:
-    Ui::AppLocker *ui;
+    Ui::LockWindow *ui;
 };
 
 #endif

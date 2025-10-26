@@ -24,7 +24,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class Ui_AppLocker
+class Ui_LockWindow
 {
 public:
     QWidget *centralwidget;
@@ -52,14 +52,14 @@ public:
     QPushButton *changeMasterButton;
     QPushButton *updateButton;
 
-    void setupUi(QMainWindow *AppLocker)
+    void setupUi(QMainWindow *LockWindow)
     {
-        if (AppLocker->objectName().isEmpty())
-            AppLocker->setObjectName("AppLocker");
-        AppLocker->resize(450, 550);
-        AppLocker->setMinimumSize(QSize(450, 550));
-        AppLocker->setMaximumSize(QSize(450, 550));
-        AppLocker->setStyleSheet(QString::fromUtf8("\n"
+        if (LockWindow->objectName().isEmpty())
+            LockWindow->setObjectName("LockWindow");
+        LockWindow->resize(450, 550);
+        LockWindow->setMinimumSize(QSize(450, 550));
+        LockWindow->setMaximumSize(QSize(450, 550));
+        LockWindow->setStyleSheet(QString::fromUtf8("\n"
 "    QMainWindow {\n"
 "     background-color: #f5f5f5;\n"
 "    }\n"
@@ -135,7 +135,7 @@ public:
 "     border-radius: 12px;\n"
 "    }\n"
 "   "));
-        centralwidget = new QWidget(AppLocker);
+        centralwidget = new QWidget(LockWindow);
         centralwidget->setObjectName("centralwidget");
         verticalLayout = new QVBoxLayout(centralwidget);
         verticalLayout->setSpacing(20);
@@ -262,39 +262,39 @@ public:
 
         verticalLayout->addWidget(headerFrame);
 
-        AppLocker->setCentralWidget(centralwidget);
+        LockWindow->setCentralWidget(centralwidget);
 
-        retranslateUi(AppLocker);
+        retranslateUi(LockWindow);
 
-        QMetaObject::connectSlotsByName(AppLocker);
+        QMetaObject::connectSlotsByName(LockWindow);
     } // setupUi
 
-    void retranslateUi(QMainWindow *AppLocker)
+    void retranslateUi(QMainWindow *LockWindow)
     {
-        AppLocker->setWindowTitle(QCoreApplication::translate("AppLocker", "App Locker", nullptr));
-        titleLabel->setText(QCoreApplication::translate("AppLocker", "\360\237\224\222 App Locker", nullptr));
-        subtitleLabel->setText(QCoreApplication::translate("AppLocker", "Secure your applications with password protection", nullptr));
-        appLabel->setText(QCoreApplication::translate("AppLocker", "Select Application:", nullptr));
-        appComboBox->setItemText(0, QCoreApplication::translate("AppLocker", "Android Studio", nullptr));
-        appComboBox->setItemText(1, QCoreApplication::translate("AppLocker", "Chrome", nullptr));
-        appComboBox->setItemText(2, QCoreApplication::translate("AppLocker", "WhatsApp", nullptr));
-        appComboBox->setItemText(3, QCoreApplication::translate("AppLocker", "Instagram", nullptr));
-        appComboBox->setItemText(4, QCoreApplication::translate("AppLocker", "Settings", nullptr));
+        LockWindow->setWindowTitle(QCoreApplication::translate("LockWindow", "App Locker", nullptr));
+        titleLabel->setText(QCoreApplication::translate("LockWindow", "\360\237\224\222 App Locker", nullptr));
+        subtitleLabel->setText(QCoreApplication::translate("LockWindow", "Secure your applications with password protection", nullptr));
+        appLabel->setText(QCoreApplication::translate("LockWindow", "Select Application:", nullptr));
+        appComboBox->setItemText(0, QCoreApplication::translate("LockWindow", "Android Studio", nullptr));
+        appComboBox->setItemText(1, QCoreApplication::translate("LockWindow", "Chrome", nullptr));
+        appComboBox->setItemText(2, QCoreApplication::translate("LockWindow", "WhatsApp", nullptr));
+        appComboBox->setItemText(3, QCoreApplication::translate("LockWindow", "Instagram", nullptr));
+        appComboBox->setItemText(4, QCoreApplication::translate("LockWindow", "Settings", nullptr));
 
-        appPasswordLabel->setText(QCoreApplication::translate("AppLocker", "App Password:", nullptr));
-        appPasswordEdit->setPlaceholderText(QCoreApplication::translate("AppLocker", "Enter password for this app", nullptr));
-        masterPasswordLabel->setText(QCoreApplication::translate("AppLocker", "Master Password:", nullptr));
-        masterPasswordEdit->setPlaceholderText(QCoreApplication::translate("AppLocker", "Enter your master password", nullptr));
-        lockButton->setText(QCoreApplication::translate("AppLocker", "\360\237\224\222 Lock", nullptr));
-        unlockButton->setText(QCoreApplication::translate("AppLocker", "\360\237\224\223 Unlock", nullptr));
-        changeMasterButton->setText(QCoreApplication::translate("AppLocker", "\360\237\224\221 Change Master Password", nullptr));
-        updateButton->setText(QCoreApplication::translate("AppLocker", "\360\237\224\204 Check for Updates", nullptr));
+        appPasswordLabel->setText(QCoreApplication::translate("LockWindow", "App Password:", nullptr));
+        appPasswordEdit->setPlaceholderText(QCoreApplication::translate("LockWindow", "Enter password for this app", nullptr));
+        masterPasswordLabel->setText(QCoreApplication::translate("LockWindow", "Master Password:", nullptr));
+        masterPasswordEdit->setPlaceholderText(QCoreApplication::translate("LockWindow", "Enter your master password", nullptr));
+        lockButton->setText(QCoreApplication::translate("LockWindow", "\360\237\224\222 Lock", nullptr));
+        unlockButton->setText(QCoreApplication::translate("LockWindow", "\360\237\224\223 Unlock", nullptr));
+        changeMasterButton->setText(QCoreApplication::translate("LockWindow", "\360\237\224\221 Change Master Password", nullptr));
+        updateButton->setText(QCoreApplication::translate("LockWindow", "\360\237\224\204 Check for Updates", nullptr));
     } // retranslateUi
 
 };
 
 namespace Ui {
-    class AppLocker: public Ui_AppLocker {};
+    class LockWindow: public Ui_LockWindow {};
 } // namespace Ui
 
 QT_END_NAMESPACE
