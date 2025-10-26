@@ -31,6 +31,7 @@
 #include <QDir>
 #include <QSharedMemory>
 #include <QCoreApplication>
+#include <QFileInfo>
 
 #include "version.h"
 
@@ -692,53 +693,116 @@ protected:
 QMap<QString, QString> getInstalledApps()
 {
     QMap<QString, QString> installedApps;
-    QString uninstallPath = "HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall";
-    QSettings settings(uninstallPath, QSettings::NativeFormat);
 
-    QStringList subKeys = settings.childGroups();
-    foreach (const QString &subKey, subKeys)
+    // ✅ Registry locations (include 32-bit and 64-bit apps)
+    QStringList uninstallKeys = {
+        "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
+        "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
+        "HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall"};
+
+    for (const QString &uninstallPath : uninstallKeys)
     {
-        settings.beginGroup(subKey);
-        QString displayName = settings.value("DisplayName").toString();
-        QString displayIcon = settings.value("DisplayIcon").toString();
-        if (!displayName.isEmpty() && !displayIcon.isEmpty())
-        {
-            QString exeName = displayIcon.split(',').first().remove('"').split('\\').last();
-            if (!exeName.isEmpty() && exeName.endsWith(".exe", Qt::CaseInsensitive))
-            {
-                if (!installedApps.contains(displayName))
-                {
-                    installedApps.insert(displayName, exeName);
-                }
-            }
-        }
-        settings.endGroup();
-    }
+        QSettings settings(uninstallPath, QSettings::NativeFormat);
+        QStringList subKeys = settings.childGroups();
 
-    QString uninstallPathCU = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall";
-    QSettings settingsCU(uninstallPathCU, QSettings::NativeFormat);
-
-    QStringList subKeysCU = settingsCU.childGroups();
-    foreach (const QString &subKey, subKeysCU)
-    {
-        settingsCU.beginGroup(subKey);
-        QString displayName = settingsCU.value("DisplayName").toString();
-        QString displayIcon = settingsCU.value("DisplayIcon").toString();
-        if (!displayName.isEmpty() && !displayIcon.isEmpty())
+        for (const QString &subKey : subKeys)
         {
-            QString exeName = displayIcon.split(',').first().remove('"').split('\\').last();
-            if (!exeName.isEmpty() && exeName.endsWith(".exe", Qt::CaseInsensitive))
+            settings.beginGroup(subKey);
+            QString displayName = settings.value("DisplayName").toString().trimmed();
+            QString displayIcon = settings.value("DisplayIcon").toString().trimmed();
+            QString installLocation = settings.value("InstallLocation").toString().trimmed();
+            QString uninstallString = settings.value("UninstallString").toString().trimmed();
+            bool systemComponent = settings.value("SystemComponent", 0).toInt() != 0;
+
+            if (displayName.isEmpty() || systemComponent)
             {
-                if (!installedApps.contains(displayName))
-                {
-                    installedApps.insert(displayName, exeName);
-                }
+                settings.endGroup();
+                continue;
             }
+
+            QString exeName;
+
+            // Prefer DisplayIcon if valid
+            if (!displayIcon.isEmpty())
+            {
+                QString cleanedIcon = displayIcon.split(',').first().remove('"');
+                QFileInfo fi(cleanedIcon);
+                if (fi.exists() && fi.suffix().compare("exe", Qt::CaseInsensitive) == 0)
+                    exeName = fi.fileName();
+            }
+
+            // Fallback: try InstallLocation
+            if (exeName.isEmpty() && !installLocation.isEmpty())
+            {
+                QDir dir(installLocation);
+                QStringList exes = dir.entryList(QStringList("*.exe"), QDir::Files);
+                if (!exes.isEmpty())
+                    exeName = exes.first();
+            }
+
+            // Fallback: parse uninstall string
+            if (exeName.isEmpty() && uninstallString.contains(".exe", Qt::CaseInsensitive))
+            {
+                QString candidate = uninstallString.split(' ').first().remove('"');
+                QFileInfo fi(candidate);
+                if (fi.exists())
+                    exeName = fi.fileName();
+            }
+
+            if (!exeName.isEmpty() && !installedApps.contains(displayName))
+                installedApps.insert(displayName, exeName);
+
+            settings.endGroup();
         }
-        settingsCU.endGroup();
     }
 
     return installedApps;
+}
+
+QMap<QString, QString> getUwpApps()
+{
+    QMap<QString, QString> uwpApps;
+
+    QProcess process;
+    process.start("powershell", QStringList() << "Get-StartApps | Select-Object Name, AppID");
+    process.waitForFinished();
+
+    QString output = process.readAllStandardOutput();
+    QStringList lines = output.split('\n', Qt::SkipEmptyParts);
+
+    for (const QString &line : lines.mid(2)) // skip headers and separator
+    {
+        QString trimmed = line.trimmed();
+        if (trimmed.isEmpty()) continue;
+
+        // Find the position of the AppID, which is the last part of the string
+        int lastSpace = trimmed.lastIndexOf(' ');
+        if (lastSpace == -1) continue;
+
+        QString name = trimmed.left(lastSpace).trimmed();
+        QString appId = trimmed.mid(lastSpace + 1).trimmed();
+
+        if (!name.isEmpty() && !appId.isEmpty() && !uwpApps.contains(name))
+        {
+            uwpApps.insert(name, appId);
+        }
+    }
+
+    return uwpApps;
+}
+
+QMap<QString, QString> getAllInstalledApps()
+{
+    QMap<QString, QString> allApps = getInstalledApps();  // Win32 apps
+    QMap<QString, QString> uwpApps = getUwpApps();        // UWP apps
+
+    for (auto it = uwpApps.begin(); it != uwpApps.end(); ++it)
+    {
+        if (!allApps.contains(it.key()))
+            allApps.insert(it.key(), it.value());
+    }
+
+    return allApps;
 }
 
 int main(int argc, char *argv[])
@@ -816,8 +880,11 @@ int main(int argc, char *argv[])
     QComboBox *appComboBox = new QComboBox(&window);
     appComboBox->move(30, 60);
     appComboBox->resize(240, 25);
-    QMap<QString, QString> installedApps = getInstalledApps();
-    appComboBox->addItems(installedApps.keys());
+    QMap<QString, QString> installedApps = getAllInstalledApps();
+    for (auto it = installedApps.begin(); it != installedApps.end(); ++it)
+    {
+        appComboBox->addItem(it.key(), it.value());
+    }
 
     QLabel *passLabel = new QLabel("App Password:", &window);
     passLabel->move(30, 100);
@@ -928,8 +995,8 @@ int main(int argc, char *argv[])
 
     QObject::connect(lockBtn, &QPushButton::clicked, [&]()
                      {
-        QString displayName = appComboBox->currentText();
-        QString appName = installedApps.value(displayName);
+        if (appComboBox->currentIndex() < 0) return;
+        QString appName = appComboBox->currentData().toString();
         QString appPass = passwordInput->text().trimmed();
         QString masterPass = masterPasswordInput->text().trimmed();
 
@@ -978,8 +1045,8 @@ int main(int argc, char *argv[])
 
     QObject::connect(unlockBtn, &QPushButton::clicked, [&]()
                      {
-        QString displayName = appComboBox->currentText();
-        QString appName = installedApps.value(displayName);
+        if (appComboBox->currentIndex() < 0) return;
+        QString appName = appComboBox->currentData().toString();
         QString masterPass = masterPasswordInput->text().trimmed();
 
         if (!verifyMasterPassword(masterPass)) {
